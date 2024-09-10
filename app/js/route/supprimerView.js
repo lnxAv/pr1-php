@@ -12,7 +12,13 @@ class SupprimerView {
         submitActionElement.innerHTML = "Supprimer";
         submitActionElement.className = "btn btn-danger";
         submitActionElement.hidden = false;
-        submitActionElement.onclick = ()=>{ console.log('delete-etudiant')};
+        submitActionElement.onclick = ()=>{
+            if(confirm("Êtes-vous sûr de vouloir supprimer cet étudiant ?")){
+                console.log('delete-etudiant')
+            }else{
+                return;
+            }
+        };
         submitAddElement.onclick = ()=>{ routeChange('ajouter', {})};
         submitAddElement.classList = "btn btn-outline-success";
         const emailElement = formElement.querySelector("#email");
