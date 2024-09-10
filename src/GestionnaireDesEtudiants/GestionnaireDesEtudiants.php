@@ -4,32 +4,38 @@ abstract class GestionnaireDesEtudiants extends OperationsEtudiantes {
     protected $filePath;
     private $file;
 
+    public function __construct($filePath = "student.txt") {
+        $this->filePath = $filePath;
+    }
+
     abstract protected function toString();
     abstract protected function fromString();
 
     protected function close() {
-        if($file){
-            fclose($file);
+        if ($this->file) {
+            fclose($this->file);
         }
     }
 
     protected function open($state) {
-        $this->close();
-        $file = fopen(filePath,$state);
+        $this->close(); 
+        $this->file = fopen($this->filePath, $state);
     }
 
     protected function push() {
-        $this->open("w");
-        fwrite($this->$file, "Bonjour");
-        fclose($file);
-
+        $this->open("w"); 
+        fwrite($this->file);
+        fclose($this->file); 
     }
- }
+}
+?>
 
+
+Class to manipulate the file
 /* -variable
   protected filePath
   private file
-
+*/
 /*
 * abstract protected function toString()
 * abstract protected function fromString()
@@ -61,4 +67,3 @@ abstract class GestionnaireDesEtudiants extends OperationsEtudiantes {
 * If reduce is set to true
 * remove comparator from the array when found
 */
-?>
