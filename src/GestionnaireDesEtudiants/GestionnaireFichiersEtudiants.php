@@ -1,10 +1,10 @@
-<?php namespace Modules\Gestionnaire;
+<?php 
 
 include "GestionnaireDesEtudiants.php";
 
 class GestionnaireDesFichiersEtudiants extends GestionnaireDesEtudiants {
 
-    private $filePath;
+    protected $filePath;
 
     public function __construct($filePath) {
         $this->filePath = $filePath;
@@ -14,12 +14,16 @@ class GestionnaireDesFichiersEtudiants extends GestionnaireDesEtudiants {
       return "{$this->firstName};{$this->lastName};{$this->dob};{$this->email}";
     }
 
-    public static function fromString($data) { 
+    public function fromString($data) { 
       list($firstName, $lastname, $dob, $email) = explode(';', $data);
       return new self($firstName, $lastName, $dob, $email);
     }
     public function test() {
     }
+    public function getStudents(){}
+    public function setStudents(){}
+    public function putStudents(){}
+    public function deleteStudents(){}
 }
 ?>
 

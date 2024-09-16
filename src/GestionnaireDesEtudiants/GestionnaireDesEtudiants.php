@@ -1,6 +1,8 @@
-<?php namespace Modules\Gestionnaire;
+<?php 
 
-abstract class GestionnaireDesEtudiants extends OperationsEtudiantes {
+include 'OperationsEtudiantes.php';
+
+abstract class GestionnaireDesEtudiants implements OperationEtudiant {
 
     protected $filePath;
     private $file;
@@ -9,8 +11,8 @@ abstract class GestionnaireDesEtudiants extends OperationsEtudiantes {
         $this->filePath = $filePath;
     }
 
-    abstract protected function toString();
-    abstract protected function fromString();
+    abstract protected function toString($filePath);
+    abstract protected function fromString($data);
 
         // protected function close
 
