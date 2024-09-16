@@ -1,4 +1,5 @@
-<?php   
+<?php   namespace Modules\Gestionnaire;
+
     interface OperationEtudiant {
         public function getStudents();
         public function setStudents();

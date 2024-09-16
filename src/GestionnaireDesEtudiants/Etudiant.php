@@ -1,4 +1,4 @@
-<?php
+<?php namespace Modules\Gestionnaire;
 class Etudiant {
     public $nom;
     public $prenom;

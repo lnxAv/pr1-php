@@ -1,4 +1,5 @@
-<?php   
+<?php namespace Modules\Gestionnaire;
+
 abstract class GestionnaireDesEtudiants extends OperationsEtudiantes {
 
     protected $filePath;
