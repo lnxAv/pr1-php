@@ -12,7 +12,7 @@ class ModifierView {
         submitActionElement.innerHTML = "Modifier";
         submitActionElement.className = "btn btn-primary";
         submitActionElement.hidden = false;
-        submitActionElement.onclick = ()=>{ console.log('put-etudiant')};
+        submitActionElement.onclick = ()=>{ putEtudiant(emailElement.value, nomElement.value, prenomElement.value, dateNaissanceElement.value)};
         submitAddElement.onclick = ()=>{ routeChange('ajouter', {})};
         submitAddElement.classList = "btn btn-outline-success";
         const emailElement = formElement.querySelector("#email");

@@ -14,7 +14,7 @@ class SupprimerView {
         submitActionElement.hidden = false;
         submitActionElement.onclick = ()=>{
             if(confirm("Êtes-vous sûr de vouloir supprimer cet étudiant ?")){
-                console.log('delete-etudiant')
+                deleteEtudiant(emailElement.value);
             }else{
                 return;
             }

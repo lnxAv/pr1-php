@@ -11,7 +11,7 @@ class AjouterView {
         titleElement.innerHTML = "Maquette - Ajouter"; 
         submitActionElement.innerHTML = "";
         submitActionElement.hidden = true;
-        submitAddElement.onclick = ()=>{ console.log('post-etudiant')};
+        submitAddElement.onclick = ()=>{ console.log('HELLO')};
         submitAddElement.classList = "btn btn-success";
         const emailElement = formElement.querySelector("#email");
         emailElement.disabled = false;
