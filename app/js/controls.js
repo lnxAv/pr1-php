@@ -1,4 +1,5 @@
 async function getEtudiants(email) {
+    console.log('get');
     const response = await fetch(
         "http://localhost/pr1-php/api/v1/etudiant.php",
         {
@@ -34,6 +35,7 @@ async function postEtudiant(email, nom, prenom, dateNaissance){
         }
     ).then(response => response.json())
     .catch(error => console.log(error));
+    console.log(response)
     return response;
 }
 

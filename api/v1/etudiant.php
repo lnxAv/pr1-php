@@ -1,55 +1,38 @@
 <?php
-    use Module\Gestionnaire\Etudiant;
-    use Module\Gestionnaire\GestionnaireFichesEtudiants;
-
-    $gestionnaire = new GestionnaireFichesEtudiants("student.txt");
-
+    header('Content-Type: application/json; charset=utf-8');
+    require_once "../../src/GestionnaireDesEtudiants/GestionnaireFichiersEtudiants.php";
     $request_method = $_SERVER['REQUEST_METHOD'];
+    $gestionnaire = new GestionnaireDesFichiersEtudiants("student.txt");
+    
     switch ($request_method) {
         case 'GET':
             /*  give all if email not specified else specific students  
             *   @REQ body: { email?: string } 
             */
-            $response = "Get request";
-            if(isset($_GET['email'])){
-                $response = $gestionnaire->getStudents($_POST['email']);
-            }else{
-                $response = $gestionnaire->getStudents();
-            }
-            break;
+            $response = json_encode(array("res" => "Get request"));
         case 'POST':
             /* Ajoute un etudiant 
             * @BODY body: { nom, prenom, date_naissance, email }
             */
-            $response = "Post request";
-            $student = new Etudiant($_POST['nom'], $_POST['prenom'], $_POST['date_naissance'], $_POST['email']);
-            $gestionnaire->setStudents($student);
+            $response = json_encode(array("res" => "Post request"));
             break;
         case 'PUT':
             /* Update un etudiant 
             * @BODY body: { nom, prenom, date_naissance, email }
             */
-            $response = "Put request";
-            $student = new Etudiant($_POST['nom'], $_POST['prenom'], $_POST['date_naissance'], $_POST['email']);
-            $gestionnaire->putStudents($student);
+            $response = json_encode(array("res" => "Put request"));
             break;
         case "DELETE":
             /* Erase a student 
             * @BODY body: { email }
             */
-            $response = "Delete request";
-            if(isset($_POST['email'])){
-                $response = $gestionnaire->deleteStudents($_POST['email']);
-            } else {
-                // TODO: return no email error
-            }
+            $response = json_encode(array("res" => "Delete request"));
             break;
         default:
             /* Invalid request */
-            $response = "Invalid request";
+            $response = json_encode(array("res" => "Invalid request"));
             // TODO: return invalid request error
             break;
     }
-    
     echo $response;
 ?>
