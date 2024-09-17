@@ -78,7 +78,7 @@ protected function replace($comparator, $newData) {
 
 // protected function remove 
 
-public function  remove($comparator) {
+protected function  remove($comparator) {
     $this->remove([$comparator]);
 }
 
