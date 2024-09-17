@@ -19,22 +19,27 @@ class GestionnaireDesFichiersEtudiants extends GestionnaireDesEtudiants {
       list($prenom, $nom, $date_naissance, $email) = explode(';', $string);
       return new self($prenom, $nom, $date_naissance, $email);
     }
-    public function test($studentTest) {
+
+    public function testWithStudent($studentTest) {
       $this->push($this->toString($studentTest));
-      
-    }
+  }
+
+  public function test() {
+      $defaultStudent = new Etudiant('Nom', 'Prenom', 'Date', 'email@example.com');
+      $this->testWithStudent($defaultStudent);
+  }
+
+
     public function getStudents(){}
     public function setStudents(){}
     public function putStudents(){}
     public function deleteStudents(){}
 }
 $gestionnaire = new GestionnaireDesFichiersEtudiants("student.txt");
-$studentTest = new Etudiant('nom', 'prenom', 'date_naissance', 'email');
 
-echo "Gestionnaire des Fichiers Etudiants object created.<br>";
+$etudiantTest = new Etudiant('Dupont', 'Jean', '1990-01-01', 'jean.dupont@email.com');
 
-$gestionnaire->test($studentTest)
-
+$gestionnaire->testWithStudent($etudiantTest);
 ?>
 
 

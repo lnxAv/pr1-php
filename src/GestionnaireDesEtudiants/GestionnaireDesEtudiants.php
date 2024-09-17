@@ -23,6 +23,7 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
         }
     }
 
+
         // protected function open
 
 
@@ -30,6 +31,15 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
         $this->close(); 
         $this->file = fopen($this->filePath, $state);
     }
+
+    
+    public function testWithStudent(Etudiant $studentTest) {
+        $this->push($this->toString($studentTest));
+        echo "Étudiant de test ajouté.\n";
+        $this->displayFileContents();
+    }
+    
+
 
     // protected function push
 
@@ -72,33 +82,41 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
         rename($tempFile, $this->filePath);
     }
 
+
+
+    
     // protected function remove
+    public function remove($comparator) {
+        $this->remove([$comparator]);
+    }
 
+    public function test() {
 
-    protected function remove(array $comparators, bool $reduce = false) {
+        $student1 = new Etudiant('Dupont', 'Jean', '1990-01-01', 'jean.dupont@email.com');
+        $student2 = new Etudiant('Martin', 'Marie', '1992-05-15', 'marie.martin@email.com');
+        $student3 = new Etudiant('Durand', 'Pierre', '1988-11-30', 'pierre.durand@email.com');
+
+        $this->push($this->toString($student1));
+        $this->push($this->toString($student2));
+        $this->push($this->toString($student3));
+
+        echo "Étudiants ajoutés.\n";
+
+        $this->remove(function($line) {
+            return strpos($line, 'Martin;Marie') !== false;
+        });
+
+        echo "Étudiant 'Martin Marie' supprimé.\n";
+
+        $this->displayFileContents();
+    }
+    private function displayFileContents() {
         $this->open("r");
-        $tempFile = tempnam(sys_get_temp_dir(), 'temp');
-        $tempHandle = fopen($tempFile, "w");
-
+        echo "Contenu du fichier après suppression :\n";
         while (($line = fgets($this->file)) !== false) {
-            $shouldRemove = false;
-            foreach ($comparators as $key => $comparator) {
-                if ($comparator($line)) {
-                    $shouldRemove = true;
-                    if ($reduce) {
-                        unset($comparators[$key]);
-                    }
-                    break;
-                }
-            }
-            if (!$shouldRemove) {
-                fwrite($tempHandle, $line);
-            }
+            echo $line;
         }
-        fclose($tempHandle);
         $this->close();
-        unlink($this->filePath);
-        rename($tempFile, $this->filePath);
     }
 }
 ?>
