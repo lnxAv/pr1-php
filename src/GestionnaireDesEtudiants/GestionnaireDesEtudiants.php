@@ -84,9 +84,10 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
 
 
 
+
     
     // protected function remove
-    public function remove($comparator) {
+    protected function remove($comparator) {
         $this->remove([$comparator]);
     }
 
