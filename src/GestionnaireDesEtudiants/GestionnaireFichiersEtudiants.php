@@ -35,11 +35,12 @@ class GestionnaireDesFichiersEtudiants extends GestionnaireDesEtudiants {
     public function putStudents(){}
     public function deleteStudents(){}
 }
+
 $gestionnaire = new GestionnaireDesFichiersEtudiants("student.txt");
-
 $etudiantTest = new Etudiant('Dupont', 'Jean', '1990-01-01', 'jean.dupont@email.com');
-
 $gestionnaire->testWithStudent($etudiantTest);
+
+
 ?>
 
 

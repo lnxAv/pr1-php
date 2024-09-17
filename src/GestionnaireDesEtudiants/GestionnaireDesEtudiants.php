@@ -14,9 +14,9 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
     abstract protected function toString($filePath);
     abstract protected function fromString($data);
 
+    
+
         // protected function close
-
-
     protected function close() {
         if ($this->file) {
             fclose($this->file);
@@ -42,8 +42,6 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
 
 
     // protected function push
-
-    
     protected function push($data) {
         echo $data; 
         $this->open("w"); 
@@ -54,71 +52,77 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
 
 // protected function replace
 
-
-    protected function replace(array $comparators, bool $reduce = false) {
-        $this->open("r+");
-        $tempFile = tempnam(sys_get_temp_dir(), 'temp');
-        $temp = fopen($tempFile, "w");
-        while (($line = fgets($this->file)) !== false) {
-            $replaced = false;
-            foreach ($comparators as $key => $comparator) {
-                if ($comparator($line)) {
-                    $newLine = $this->toString();
-                    fwrite($temp, $newLine . PHP_EOL);
-                    $replaced = true;
-                    if ($reduce) {
-                        unset($comparators[$key]);
-                    }
-                    break;
-                }
-            }
-            if (!$replaced) {
-                fwrite($temp, $line);
-            }
+protected function replace($comparator, $newData) {
+    $this->open("r+");
+    $tempFile = tempnam(sys_get_temp_dir(), 'temp');
+    $temp = fopen($tempFile, "w");
+    
+    $replaced = false;
+    while (($line = fgets($this->file)) !== false) {
+        if (!$replaced && $comparator($line)) {
+            fwrite($temp, $this->toString($newData) . PHP_EOL);
+            $replaced = true;
+        } else {
+            fwrite($temp, $line);
         }
-        fclose($temp);
-        $this->close();
-        unlink($this->filePath);
-        rename($tempFile, $this->filePath);
     }
+    
+    fclose($temp);
+    $this->close();
+    
+    unlink($this->filePath);
+    rename($tempFile, $this->filePath);
+    
+    return $replaced;
+}
+
+// protected function remove 
+
+public function  remove($comparator) {
+    $this->remove([$comparator]);
+}
 
 
+public function test() {
+    // Ajout de quelques étudiants pour le test
+    $student1 = new Etudiant('Dupont', 'Jean', '1990-01-01', 'jean.dupont@email.com');
+    $student2 = new Etudiant('Martin', 'Marie', '1992-05-15', 'marie.martin@email.com');
+    $student3 = new Etudiant('Durand', 'Pierre', '1988-11-30', 'pierre.durand@email.com');
+
+    $this->push($this->toString($student1));
+    $this->push($this->toString($student2));
+    $this->push($this->toString($student3));
+
+    echo "Étudiants ajoutés.\n";
+    $this->displayFileContents();
 
 
     
-    // protected function remove
-    protected function remove($comparator) {
-        $this->remove([$comparator]);
+    // Test de la fonction replace
+    $newStudent = new Etudiant('Martin', 'Sophie', '1993-07-20', 'sophie.martin@email.com');
+    $replaced = $this->replace(
+        function($line) { 
+            return strpos($line, 'marie.martin@email.com') !== false; 
+        },
+        $newStudent
+    );
+    if ($replaced) {
+        echo "Remplacement effectué : Marie Martin a été remplacée par Sophie Martin.\n";
+    } else {
+        echo "Aucun remplacement effectué.\n";
     }
-
-    public function test() {
-
-        $student1 = new Etudiant('Dupont', 'Jean', '1990-01-01', 'jean.dupont@email.com');
-        $student2 = new Etudiant('Martin', 'Marie', '1992-05-15', 'marie.martin@email.com');
-        $student3 = new Etudiant('Durand', 'Pierre', '1988-11-30', 'pierre.durand@email.com');
-
-        $this->push($this->toString($student1));
-        $this->push($this->toString($student2));
-        $this->push($this->toString($student3));
-
-        echo "Étudiants ajoutés.\n";
-
-        $this->remove(function($line) {
-            return strpos($line, 'Martin;Marie') !== false;
-        });
-
-        echo "Étudiant 'Martin Marie' supprimé.\n";
-
-        $this->displayFileContents();
+    echo "Contenu du fichier après remplacement :\n";
+    $this->displayFileContents();
+}
+private function displayFileContents() {
+    $this->open("r");
+    while (($line = fgets($this->file)) !== false) {
+        echo $line;
     }
-    private function displayFileContents() {
-        $this->open("r");
-        echo "Contenu du fichier après suppression :\n";
-        while (($line = fgets($this->file)) !== false) {
-            echo $line;
-        }
-        $this->close();
+    $this->close();
+    echo "\n";
     }
 }
+
 ?>
 
