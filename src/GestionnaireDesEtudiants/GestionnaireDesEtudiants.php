@@ -1,9 +1,8 @@
 <?php 
-
 include 'OperationsEtudiantes.php';
-
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 abstract class GestionnaireDesEtudiants implements OperationEtudiant {
-
     protected $filePath;
     private $file;
 
@@ -12,117 +11,135 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
     }
 
     abstract protected function toString($filePath);
-    abstract protected function fromString($data);
+    abstract protected function fromString($student);
 
-    
-
-        // protected function close
+    /* Fermeture et ouverture du fichier */
     protected function close() {
         if ($this->file) {
             fclose($this->file);
+            $this->file = null;
         }
     }
-
-
-        // protected function open
-
 
     protected function open($state) {
         $this->close(); 
         $this->file = fopen($this->filePath, $state);
     }
 
-    
-    public function testWithStudent(Etudiant $studentTest) {
-        $this->push($this->toString($studentTest));
-        echo "Étudiant de test ajouté.\n";
-        $this->displayFileContents();
-    }
-    
-
-
-    // protected function push
-    protected function push($data) {
-        echo $data; 
-        $this->open("w"); 
-        fwrite($this->file, $data);
-        $this->close(); 
+    /* Recherche d'étudiant dans le fichier */
+    protected function read($filter = 'all', $info='') {
+        $this->open("r");
+        $students = array();
+        $regex= "/^{$info}/i";
+        while (($line = fgets($this->file)) !== false) {
+            $match = $this->compare($filter, $line, $regex);
+            if ($match) {
+                $students[] = $match;
+            }
+        }
+        $this->close();
+        return $students;
     }
 
-
-// protected function replace
-
-protected function replace($comparator, $newData) {
-    $this->open("r+");
-    $tempFile = tempnam(sys_get_temp_dir(), 'temp');
-    $temp = fopen($tempFile, "w");
-    
-    $replaced = false;
-    while (($line = fgets($this->file)) !== false) {
-        if (!$replaced && $comparator($line)) {
-            fwrite($temp, $this->toString($newData) . PHP_EOL);
-            $replaced = true;
-        } else {
-            fwrite($temp, $line);
+    /* Compare un regex et un étudiant
+    * si le regex matche, on retourne l'étudiant
+    * sinon on retourne null
+    */
+    private function compare($filter, $line, $regex) {
+        $student = $this->fromString($line);
+        if(!$student) return null;
+        switch ($filter) {
+            case "email":
+                return preg_match($regex, $student->email)? $student : null;
+                break;
+            case "nom":
+                return preg_match($regex, $student->nom)? $student : null;
+                break;
+            case "prenom":
+                return preg_match($regex, $student->prenom)? $student : null;
+                break;
+            case "date_naissance":
+                return preg_match($regex, $student->date_naissance)? $student : null;
+                break;
+            case "all":
+                return $student;
+                break;
+            default:
+                return null;
+                break;
         }
     }
-    
-    fclose($temp);
-    $this->close();
-    
-    unlink($this->filePath);
-    rename($tempFile, $this->filePath);
-    
-    return $replaced;
-}
 
-// protected function remove 
-
-protected function  remove($comparator) {
-    $this->remove([$comparator]);
-}
-
-
-public function test() {
-    // Ajout de quelques étudiants pour le test
-    $student1 = new Etudiant('Dupont', 'Jean', '1990-01-01', 'jean.dupont@email.com');
-    $student2 = new Etudiant('Martin', 'Marie', '1992-05-15', 'marie.martin@email.com');
-    $student3 = new Etudiant('Durand', 'Pierre', '1988-11-30', 'pierre.durand@email.com');
-
-    $this->push($this->toString($student1));
-    $this->push($this->toString($student2));
-    $this->push($this->toString($student3));
-
-    echo "Étudiants ajoutés.\n";
-    $this->displayFileContents();
-
-
-    
-    // Test de la fonction replace
-    $newStudent = new Etudiant('Martin', 'Sophie', '1993-07-20', 'sophie.martin@email.com');
-    $replaced = $this->replace(
-        function($line) { 
-            return strpos($line, 'marie.martin@email.com') !== false; 
-        },
-        $newStudent
-    );
-    if ($replaced) {
-        echo "Remplacement effectué : Marie Martin a été remplacée par Sophie Martin.\n";
-    } else {
-        echo "Aucun remplacement effectué.\n";
+    /* Ajout d'un étudiant dans le fichier */
+    protected function push($student) {
+        // si l'email existe déjà dans le fichier, on ne l'ajoute pas
+        if (count($this->read("email", $student->email))) {
+            return false;
+        }
+        // on ajoute l'email au fichier
+        $stringData = $this->toString($student) . PHP_EOL;
+        $this->open("a"); 
+        fwrite($this->file, $stringData);
+        $this->close(); 
+        return true;
     }
-    echo "Contenu du fichier après remplacement :\n";
-    $this->displayFileContents();
-}
-private function displayFileContents() {
-    $this->open("r");
-    while (($line = fgets($this->file)) !== false) {
-        echo $line;
-    }
-    $this->close();
-    echo "\n";
-    }
-}
 
+    /* Remplacement d'un étudiant dans le fichier */
+    protected function replace($oldStudent, $newStudent) {
+        // si l'email existe déjà dans le fichier, on ne le remplace pas
+        if (count($this->read("email", $newStudent->email))) {
+            return false;
+        }
+        // on remplace l'email dans le fichier
+        $this->open("r+");
+        $tempFile = tempnam(sys_get_temp_dir(), 'temp');
+        $temp = fopen($tempFile, "w");
+        
+        $replaced = false;
+        while (($line = fgets($this->file)) !== false) {
+            $regex = "/^{$oldStudent->email}/i";
+            if (!$replaced && $this->compare("email", $line, $regex)) {
+                fwrite($temp, $this->toString($newStudent) . PHP_EOL);
+                $replaced = true;
+            } else {
+                fwrite($temp, $line);
+            }
+        }
+        fclose($temp);
+        $this->close();
+        unlink($this->filePath);
+        rename($tempFile, $this->filePath);
+        return $replaced;
+    }
+
+    /* Suppression d'un étudiant dans le fichier */
+    protected function remove($student) {
+        // si l'email existe on le supprime
+        if (!count($this->read("email", $student->email))) {
+            return false;
+        }
+        // on supprime l'email du fichier
+        $this->open("r+");
+        $tempFile = tempnam(sys_get_temp_dir(), 'temp');
+        $temp = fopen($tempFile, "w");
+        
+        $deleted = false;
+        while (($line = fgets($this->file)) !== false) {
+            $regex = "/^{$student->email}/i";
+            if (!$deleted && $this->compare("email", $line, $regex)) {
+                // jump to next line
+                $deleted = true;
+                continue;
+            } else {
+                fwrite($temp, $line);
+            }
+        }
+        fclose($temp);
+        $this->close();
+        unlink($this->filePath);
+        rename($tempFile, $this->filePath);
+        return $deleted;
+    }
+}
 ?>
 

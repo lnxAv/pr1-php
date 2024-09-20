@@ -1,10 +1,10 @@
 <?php  
 
     interface OperationEtudiant {
-        public function getStudents();
-        public function setStudents();
-        public function putStudents();
-        public function deleteStudents();
+        public function getStudents($filter, $info);
+        public function setStudents($student);
+        public function putStudents($oldStudent, $newStudent);
+        public function deleteStudents($student);
     }
 ?>
 

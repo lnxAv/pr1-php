@@ -11,36 +11,31 @@ class GestionnaireDesFichiersEtudiants extends GestionnaireDesEtudiants {
         $this->filePath = $filePath;
     }
 
-    public function toString($student) {
+    protected function toString($student) {
       return "{$student->nom};{$student->prenom};{$student->date_naissance};{$student->email}";
     }
 
-    public function fromString($string) { 
+    protected function fromString($string) { 
       list($prenom, $nom, $date_naissance, $email) = explode(';', $string);
-      return new self($prenom, $nom, $date_naissance, $email);
+      return new Etudiant($prenom, $nom, $date_naissance, $email);
     }
 
-    public function testWithStudent($studentTest) {
-      $this->push($this->toString($studentTest));
-  }
+    public function getStudents($filter = 'all', $info = null){
+      return $this->read($filter, $info);
+    }
 
-  public function test() {
-      $defaultStudent = new Etudiant('Nom', 'Prenom', 'Date', 'email@example.com');
-      $this->testWithStudent($defaultStudent);
-  }
+    public function setStudents($student){
+      return $this->push($student);
+    }
 
+    public function putStudents($oldStudent, $newStudent){
+      return $this->replace($oldStudent, $newStudent);
+    }
 
-    public function getStudents(){}
-    public function setStudents(){}
-    public function putStudents(){}
-    public function deleteStudents(){}
+    public function deleteStudents($student){
+      return $this->remove($student);
+    }
 }
-
-$gestionnaire = new GestionnaireDesFichiersEtudiants("student.txt");
-$etudiantTest = new Etudiant('Dupont', 'Jean', '1990-01-01', 'jean.dupont@email.com');
-$gestionnaire->testWithStudent($etudiantTest);
-
-
 ?>
 
 

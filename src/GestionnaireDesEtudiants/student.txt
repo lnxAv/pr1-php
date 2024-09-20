@@ -1,1 +1,3 @@
-Dupont;Jean;1990-01-01;jean.dupont@email.com
+Sophie;Martin;1990-01-01;sophie.martin@email.com
+Jane;Doe;1990-01-01;jane.doe@email.com
+Marco;Polo;1990-01-01;polo.marco@email.com
