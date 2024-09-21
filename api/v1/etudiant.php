@@ -102,7 +102,6 @@
         default:
             /* Invalid request */
             $response = json_encode(array("res" => "Invalid request"));
-            // TODO: return invalid request error
             break;
     }
     echo $response;
