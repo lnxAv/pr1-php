@@ -1,5 +1,4 @@
-<?php 
-
+<?php
     class Etudiant {
         public $nom;
         public $prenom;

@@ -1,32 +1,103 @@
 <?php
     header('Content-Type: application/json; charset=utf-8');
     require_once "../../src/GestionnaireDesEtudiants/GestionnaireFichiersEtudiants.php";
+    require_once "../../src/GestionnaireDesEtudiants/Etudiant.php";
+    
     $request_method = $_SERVER['REQUEST_METHOD'];
     $gestionnaire = new GestionnaireDesFichiersEtudiants("student.txt");
     
+    $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $uri = explode('/', $uri);
+
+    if(!(isset($uri[4]) && $uri[4] === 'etudiant.php')) {
+        // IF IS NOT A REQUEST TO ETUDIANT.PHP
+        header('HTTP/1.1 404 Not Found');
+        $response = array("res" => null, "error" => "URI incorrect {$uri[2]}");
+        $response = json_encode($response);
+        echo $response;
+        return;
+    }
+
     switch ($request_method) {
         case 'GET':
             /*  give all if email not specified else specific students  
-            *   @REQ body: { email?: string } 
+            *   @GET: .../etudiant.php/filter?info=null
             */
-            $response = json_encode(array("res" => "Get request"));
+            if(!isset($uri[5]) && !count($_GET)) {
+                $filter = 'all';
+                $info = null;
+            }else {
+                $filter = array_keys($_GET)[0] ?? 'all';
+                $info = array_values($_GET)[0] ?? null;
+            }
+            // send request to gestionnaire
+            try {
+                $result = $gestionnaire->getStudents($filter, $info);
+                $response = array("res" => $result);
+                $response = json_encode($result);
+            } catch (Error $e) {
+                $response = array("res" => null, "error" => $e->getMessage());
+                $response = json_encode($response);
+            } catch (Throwable $e) {
+                $response = array("res" => null, "error" => ${$filter});
+                $response = json_encode($response);
+            }
+            break;
         case 'POST':
-            /* Ajoute un etudiant 
-            * @BODY body: { nom, prenom, date_naissance, email }
+            /* Ajoute un etudiant
+            * @URI: .../etudiant.php
+            * @BODY: { nom, prenom, date_naissance, email }
             */
-            $response = json_encode(array("res" => "Post request"));
+            try {
+                $data = json_decode(file_get_contents("php://input"));
+                $student = new Etudiant($data->nom, $data->prenom, $data->date_naissance, $data->email);
+                $result = $gestionnaire->setStudents($student);
+                $response = array("res" => $result? "L'operation a réussi" : "L'operation a échoué");
+                $response = json_encode($response);
+            } catch (Error $e) {
+                $response = array("res" => null, "error" => $e->getMessage());
+                $response = json_encode($response);
+            } catch (Throwable $e) {
+                $response = array("res" => null, "error" => $e->getMessage());
+                $response = json_encode($response);
+            }
             break;
         case 'PUT':
             /* Update un etudiant 
-            * @BODY body: { nom, prenom, date_naissance, email }
+            * @URI: .../etudiant.php/email
+            * @BODY: { nom, prenom, date_naissance }
             */
-            $response = json_encode(array("res" => "Put request"));
+            try {
+                $email = $uri[5];
+                $data = json_decode(file_get_contents("php://input"));
+                $student = new Etudiant($data->nom, $data->prenom, $data->date_naissance, $email);
+                $result = $gestionnaire->putStudents($student);
+                $response = array("res" => $result? "L'operation a réussi" : "L'operation a échoué");
+                $response = json_encode($response);
+            } catch (Error $e) {
+                $response = array("res" => null, "error" => $e->getMessage());
+                $response = json_encode($response);
+            } catch (Throwable $e) {
+                $response = array("res" => null, "error" => $e->getMessage());
+                $response = json_encode($response);
+            }
             break;
-        case "DELETE":
+        case 'DELETE':
             /* Erase a student 
-            * @BODY body: { email }
+            *   @URI: .../etudiant.php/email
             */
-            $response = json_encode(array("res" => "Delete request"));
+            try {
+                $email = $uri[5];
+                $result = $gestionnaire->deleteStudents($email);
+                $response = array("res" => $result? "L'operation a réussi" : "L'operation a échoué");
+                $response = json_encode($response);
+            }catch (Error $e) {
+                $response = array("res" => null, "error" => $e->getMessage());
+                $response = json_encode($response);
+            } catch (Throwable $e) {
+                $response = array("res" => null, "error" => $e->getMessage());
+                $response = json_encode($response);
+            }
             break;
         default:
             /* Invalid request */

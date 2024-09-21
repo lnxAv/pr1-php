@@ -3,31 +3,59 @@ class SupprimerView {
         this.setHTMLParams();
     }
 
-    setHTMLParams() {
+    async setHTMLParams() {
+        const params = new URLSearchParams(window.location.search);
+        const email = params.get('email');
+        const studentFound = await getEtudiants("email", email).then(response => response[0]);
+        if(!studentFound) return;
+        emailElement.value = studentFound.email;
+        nomElement.value = studentFound.nom;
+        prenomElement.value = studentFound.prenom;
+        dateNaissanceElement.value = studentFound.date_naissance;
+    }
+
+    isValid() {
+        nomElement.setCustomValidity("");
+        nomElement.classList.remove("is-invalid");
+
+        prenomElement.setCustomValidity("");
+        prenomElement.classList.remove("is-invalid");
+
+        dateNaissanceElement.setCustomValidity("");
+        dateNaissanceElement.classList.remove("is-invalid");
+
+        emailElement.setCustomValidity("");
+        emailElement.classList.remove("is-invalid");
+
+        return true;
     }
 
     render(){
         this.setHTMLParams();
+        hideAlert();
+        this.isValid();
         titleElement.innerHTML = "Maquette - Supprimer";
         submitActionElement.innerHTML = "Supprimer";
         submitActionElement.className = "btn btn-danger";
         submitActionElement.hidden = false;
-        submitActionElement.onclick = ()=>{
+        formElement.onchange = ()=>{
+            this.isValid();
+        }
+        submitActionElement.onclick = async ()=>{
             if(confirm("Êtes-vous sûr de vouloir supprimer cet étudiant ?")){
-                deleteEtudiant(emailElement.value);
+                const result = await deleteEtudiant({
+                    email: emailElement.value
+                });
+                showAlert(result.res ?? result.error, result.res? "success" : "danger");
             }else{
                 return;
             }
         };
         submitAddElement.onclick = ()=>{ routeChange('ajouter', {})};
         submitAddElement.classList = "btn btn-outline-success";
-        const emailElement = formElement.querySelector("#email");
         emailElement.disabled = true;
-        const nomElement = formElement.querySelector("#nom");
         nomElement.disabled = true;
-        const prenomElement = formElement.querySelector("#prenom");
         prenomElement.disabled = true;
-        const dateNaissanceElement = formElement.querySelector("#dateNaissance");
         dateNaissanceElement.disabled = true;
     }
 }

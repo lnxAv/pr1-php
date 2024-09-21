@@ -1,23 +1,21 @@
-async function getEtudiants(email) {
-    console.log('get');
+async function getEtudiants(filter = 'all', info = null) {
     const response = await fetch(
-        "http://localhost/pr1-php/api/v1/etudiant.php",
+        `http://localhost/pr1-php/api/v1/etudiant.php/filter?${filter}=${info}`,
         {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json"
-            },
-            body: JSON.stringify({
-                email: email || null
-            })
+            }
         }
-    ).then(response => response.json())
+    ).then(response => {
+        return response.json();
+    })
     .catch(error => console.log(error));
     return response;
 }
 
-async function postEtudiant(email, nom, prenom, dateNaissance){
+async function postEtudiant(student){
     const response = await fetch(
         "http://localhost/pr1-php/api/v1/etudiant.php",
         {
@@ -26,22 +24,19 @@ async function postEtudiant(email, nom, prenom, dateNaissance){
                 "Content-Type": "application/json",
                 "Accept": "application/json"
             },
-            body: JSON.stringify({
-                email: email,
-                nom: nom,
-                prenom: prenom,
-                dateNaissance: dateNaissance
-            })
+            body: JSON.stringify(student)
         }
-    ).then(response => response.json())
+    ).then(response => {
+        dispatchUpdateTable();
+        return response.json();
+    })
     .catch(error => console.log(error));
-    console.log(response)
     return response;
 }
 
-async function putEtudiant(email, nom, prenom, dateNaissance){
+async function putEtudiant(student){
     const response = await fetch(
-        "http://localhost/pr1-php/api/v1/etudiant.php",
+        `http://localhost/pr1-php/api/v1/etudiant.php/${student.email}`,
         {
             method: "PUT",
             headers: {
@@ -49,31 +44,33 @@ async function putEtudiant(email, nom, prenom, dateNaissance){
                 "Accept": "application/json"
             },
             body: JSON.stringify({
-                email: email,
-                nom: nom,
-                prenom: prenom,
-                dateNaissance: dateNaissance
+                nom: student.nom,
+                prenom: student.prenom,
+                date_naissance: student.date_naissance
             })
         }
-    ).then(response => response.json())
+    ).then(response => {
+        dispatchUpdateTable();
+        return response.json();
+    })
     .catch(error => console.log(error));
     return response;
 }
 
-async function deleteEtudiant(email){
+async function deleteEtudiant({email}){
     const response = await fetch(
-        "http://localhost/pr1-php/api/v1/etudiant.php",
+        `http://localhost/pr1-php/api/v1/etudiant.php/${email}`,
         {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json"
-            },
-            body: JSON.stringify({
-                email: email || null
-            })
+            }
         }
-    ).then(response => response.json())
+    ).then(response => {
+        dispatchUpdateTable();
+        return response.json();
+    })
     .catch(error => console.log(error));
     return response;
 }

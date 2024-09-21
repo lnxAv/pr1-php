@@ -1,10 +1,7 @@
-<?php 
-
+<?php
 include "GestionnaireDesEtudiants.php";
-include "Etudiant.php";
 
 class GestionnaireDesFichiersEtudiants extends GestionnaireDesEtudiants {
-
     protected $filePath;
 
     public function __construct($filePath) {
@@ -21,6 +18,8 @@ class GestionnaireDesFichiersEtudiants extends GestionnaireDesEtudiants {
     }
 
     public function getStudents($filter = 'all', $info = null){
+      if(!$filter) $filter = 'all';
+      if(!$info) $info = null;
       return $this->read($filter, $info);
     }
 
@@ -28,12 +27,12 @@ class GestionnaireDesFichiersEtudiants extends GestionnaireDesEtudiants {
       return $this->push($student);
     }
 
-    public function putStudents($oldStudent, $newStudent){
-      return $this->replace($oldStudent, $newStudent);
+    public function putStudents($student){
+      return $this->replace($student);
     }
 
-    public function deleteStudents($student){
-      return $this->remove($student);
+    public function deleteStudents($email){
+      return $this->remove($email);
     }
 }
 ?>

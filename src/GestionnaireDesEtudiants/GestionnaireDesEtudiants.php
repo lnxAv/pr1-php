@@ -1,7 +1,6 @@
-<?php 
+<?php
 include 'OperationsEtudiantes.php';
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+
 abstract class GestionnaireDesEtudiants implements OperationEtudiant {
     protected $filePath;
     private $file;
@@ -23,6 +22,7 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
 
     protected function open($state) {
         $this->close(); 
+        if(!file_exists($this->filePath)) touch($this->filePath);
         $this->file = fopen($this->filePath, $state);
     }
 
@@ -42,8 +42,8 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
     }
 
     /* Compare un regex et un étudiant
-    * si le regex matche, on retourne l'étudiant
-    * sinon on retourne null
+    * si le regex match, on retourne l'étudiant
+    * sinon on retourne null et on lance une exception
     */
     private function compare($filter, $line, $regex) {
         $student = $this->fromString($line);
@@ -65,6 +65,7 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
                 return $student;
                 break;
             default:
+                throw new Exception("Filtre inconnu");
                 return null;
                 break;
         }
@@ -74,6 +75,7 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
     protected function push($student) {
         // si l'email existe déjà dans le fichier, on ne l'ajoute pas
         if (count($this->read("email", $student->email))) {
+            throw new Exception("L'email existe déjà");
             return false;
         }
         // on ajoute l'email au fichier
@@ -85,9 +87,10 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
     }
 
     /* Remplacement d'un étudiant dans le fichier */
-    protected function replace($oldStudent, $newStudent) {
-        // si l'email existe déjà dans le fichier, on ne le remplace pas
-        if (count($this->read("email", $newStudent->email))) {
+    protected function replace($student) {
+        // regarde si L'Email existe déjà dans le fichier
+        if (!count($this->read("email", $student->email))) {
+            throw new Exception("L'email n'existe pas");
             return false;
         }
         // on remplace l'email dans le fichier
@@ -95,11 +98,11 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
         $tempFile = tempnam(sys_get_temp_dir(), 'temp');
         $temp = fopen($tempFile, "w");
         
+        $regex = "/^{$student->email}$/i";
         $replaced = false;
         while (($line = fgets($this->file)) !== false) {
-            $regex = "/^{$oldStudent->email}/i";
             if (!$replaced && $this->compare("email", $line, $regex)) {
-                fwrite($temp, $this->toString($newStudent) . PHP_EOL);
+                fwrite($temp, $this->toString($student) . PHP_EOL);
                 $replaced = true;
             } else {
                 fwrite($temp, $line);
@@ -113,9 +116,10 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
     }
 
     /* Suppression d'un étudiant dans le fichier */
-    protected function remove($student) {
+    protected function remove($email) {
         // si l'email existe on le supprime
-        if (!count($this->read("email", $student->email))) {
+        if (!count($this->read("email", $email))) {
+            throw new Exception("L'email n'existe pas");
             return false;
         }
         // on supprime l'email du fichier
@@ -125,7 +129,7 @@ abstract class GestionnaireDesEtudiants implements OperationEtudiant {
         
         $deleted = false;
         while (($line = fgets($this->file)) !== false) {
-            $regex = "/^{$student->email}/i";
+            $regex = "/^{$email}$/i";
             if (!$deleted && $this->compare("email", $line, $regex)) {
                 // jump to next line
                 $deleted = true;
